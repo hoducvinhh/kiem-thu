@@ -123,30 +123,56 @@ def test_signup_success_dynamic():
 # PHẦN 3: KIỂM THỬ CHỨC NĂNG TÌM KIẾM VÀ TRUY CẬP CHIA SẺ (SHARED DECKS)
 # ==============================================================================
 
-# 5. Test chức năng TÌM KIẾM bộ thẻ chia sẻ thật công khai
-def test_search_shared_deck_real():
+# 5. Test chức năng TẠO MỚI BỘ THẺ HỌC (Create Deck) - BẢN ĐỒNG BỘ CHUẨN ĐÃ FIX LỖI FRAMEWORK
+def test_create_new_deck_success():
     driver = open_browser()
-    driver.get("https://ankiweb.net/shared/decks")
-
-    # 1. Định vị ô tìm kiếm bằng input text/search trên trang chia sẻ công đồng
-    search_box = WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located((By.XPATH, "//input[@type='text' or @type='search']"))
-    )
     
-    search_box.clear()
-    search_box.send_keys("english")
-    search_box.send_keys(Keys.ENTER)
+    # BƯỚC 1: ĐĂNG NHẬP TRƯỚC ĐỂ VÀO TRANG DASHBOARD CÁ NHÂN
+    driver.get("https://ankiweb.net/account/login")
+    email_input = WebDriverWait(driver, 15).until(
+        EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Email']"))
+    )
+    email_input.send_keys("hoducvinh2k4@gmail.com") 
 
-    # 2. KỲ VỌNG: Kết quả tìm kiếm phải hiển thị các bộ thẻ có chứa tiêu đề tương ứng
-    first_result = WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located((By.XPATH, "//a[contains(text(), 'English') or contains(text(), 'english')]"))
+    password_input = driver.find_element(By.XPATH, "//input[@type='password']")
+    password_input.send_keys("vinhhoa12345")
+    password_input.send_keys(Keys.ENTER)
+
+    # Đợi đăng nhập thành công
+    WebDriverWait(driver, 15).until(
+        EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'Log Out') or contains(text(), 'Sign Out')]"))
     )
 
-    assert first_result.is_displayed()
-    assert "decks" in driver.current_url or "search" in driver.current_url
+    # BƯỚC 2: CLICK VÀO NÚT "Create Deck"
+    create_deck_btn = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Create Deck')]"))
+    )
+    create_deck_btn.click()
+
+    # BƯỚC 3: NHẬP TÊN VÀO BROWSER ALERT PROMPT THUẦN TÚY
+    timestamp = int(time.time())
+    new_deck_name = f"Bo_The_Vinh_{timestamp}"
+
+    # Đợi hộp thoại prompt xuất hiện
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    alert = driver.switch_to.alert
+    
+    # Điền dữ liệu tên bộ thẻ
+    alert.send_keys(new_deck_name)
+    time.sleep(1)  # Khoảng dừng quan trọng để Svelte lắng nghe và lưu trạng thái chuỗi ký tự
+    alert.accept()
+
+    # Đợi một chút để server ghi nhận và phản hồi dữ liệu về trình duyệt trước khi F5
+    time.sleep(3)
+    driver.refresh()
+
+    # BƯỚC 4: KỲ VỌNG (ASSERT) - Kiểm tra bộ thẻ bằng XPATH tìm kiếm tương đối thuần túy văn bản
+    new_deck_element = WebDriverWait(driver, 15).until(
+        EC.presence_of_element_located((By.XPATH, f"//*[text()='{new_deck_name}' or contains(text(), '{new_deck_name}')]"))
+    )
+
+    assert new_deck_element.is_displayed(), "Lỗi: Không tìm thấy bộ thẻ mới tạo trên giao diện cá nhân!"
     driver.quit()
-
-
 # 6. Test chức năng TÌM KIẾM & TRUY CẬP bộ thẻ sau khi ĐÃ ĐĂNG NHẬP (BẢN TỐI ƯU CLICK)
 def test_view_shared_deck_detail_real():
     driver = open_browser()
