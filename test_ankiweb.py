@@ -571,7 +571,7 @@ def test_ui_search_06_click_ket_qua_mo_dung_trang_chi_tiet(authenticated_driver)
 
 
 @pytest.mark.parametrize("width,height", [(1366, 768), (390, 844)])
-def test_ui_common_01_responsive_desktop_mobile_khong_vo_layout(driver, width, height):
+def test_ui_common_01_responsive_desktop_khong_vo_layout(driver, width, height):
     driver.set_window_size(width, height)
     driver.get(LOGIN_URL)
 
