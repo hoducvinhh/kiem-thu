@@ -289,7 +289,7 @@ def test_api_login_03_du_lieu_khong_hop_le_khong_loi_server(api_session, payload
     assert fields.get(1, [0])[0] in (0, 2, 3)
 
 
-# 2. Dang ky
+# 2. Dang ky 
 
 
 def test_api_register_01_get_form_dang_ky_tra_200(api_session):
